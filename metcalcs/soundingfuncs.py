@@ -1,3 +1,5 @@
+'''
+'''
 from numpy import load, array, radians, sin, cos, linspace, mean, log, isnan, nan, nanmin, nanmax, nanmean, abs, zeros, exp, where,\
                   concatenate, diff
 from numpy.ma import masked_array
@@ -5,18 +7,7 @@ from scipy.interpolate import interp1d
 import linecache
 import sys
 
-import metfuncs
-#import pdb
-
-def PrintException():
-    exc_type, exc_obj, tb = sys.exc_info()
-    f = tb.tb_frame
-    lineno = tb.tb_lineno
-    filename = f.f_code.co_filename
-    linecache.checkcache(filename)
-    line = linecache.getline(filename, lineno, f.f_globals)
-    print 'EXCEPTION IN ({}, LINE {} "{}"): {}'.format(filename, lineno, line.strip(), exc_obj)
-
+import MetCalcs.metcalcs.metfuncs
 import re
 
 # A few basic checks and possible conversions
@@ -466,7 +457,7 @@ def interp_sounding_mask(variable, pressures_s,y_points):
 
     return y_interp
 
-# <codecell>
+
 
 def LiftedCondensationLevelTemp(init_temp_k, dew_init_temp_k): 
     if (init_temp_k<100.):
@@ -475,7 +466,7 @@ def LiftedCondensationLevelTemp(init_temp_k, dew_init_temp_k):
         dew_init_temp_k = dew_init_temp_k +273.15
     return (1./(1./(dew_init_temp_k-56) + log(init_temp_k/dew_init_temp_k)/800.)) + 56
 
-# <codecell>
+
 
 def LiftedCondensationLevelPres(mean_pres, lcl_temp, mean_temp_k, kappa):
     return mean_pres * ((lcl_temp/mean_temp_k)**(1/kappa))
@@ -517,24 +508,12 @@ def LCLMethod2(temp_k, pres):
     
     return lcl
 
-# <markdowncell>
-
-# LCLT	Temperature (K) at the LCL, the lifting condensation level, from an average of the lowest 500 meters.
-# LCLT	= [1 / ( 1 / ( DWPK - 56 ) + LN ( TMPK / DWPK ) / 800 )] + 56
-# LCLP	Pressure (hPa) at the LCL, the lifting condensation level, from an average of the lowest 500 meters.
-# LCLP	= PRES * ( LCLT / ( TMPC + 273.15 ) ) ** ( 1 / KAPPA )
-# Poisson's equation
-
-# <codecell>
-
 def PoissonConstant(wvmr):
     
     """http://glossary.ametsoc.org/wiki/Poisson_constant
        May need to tweak low limit for dry air (=0.2854)"""
     
     return where(wvmr>0., 0.2854*(1-0.24*wvmr), 0.2854)
-
-# <codecell>
 
 def LFCParcelAscent(parcel_profile, temp_k, pres):
         lfc_idx = nanmax(where((parcel_profile>temp_k) & (pres<(nanmax(pres)-50)))[0])
@@ -550,7 +529,7 @@ def LFCParcelAscent(parcel_profile, temp_k, pres):
             
         return lfc_pres
 
-# <codecell>
+
 
 def EQLVParcelAscent(parcel_profile, temp_k, pres):
     
@@ -607,7 +586,6 @@ def ParcelAscentDryToLCLThenMoistC(init_parcel_pres,init_parcel_temp_c,init_parc
         
         return parcel_profile
     
-# <codecell>
 
 # CAPE and CIN
 
@@ -677,6 +655,7 @@ def CapeCinPBLInput(pres, temp_k, dew_temp_k, height, st_height, pbl_pressure): 
        
     parcel_profile = ParcelAscentDryToLCLThenMoistC(mean_pres,mean_temp_c,dew_mean_temp_c, pres)
     parcel_profile = parcel_profile+273.15
+
     # Find equilibrium level
 
     eqlv_p, eqlv_t = EQLVParcelAscent(parcel_profile, temp_k, pres)
@@ -928,3 +907,6 @@ def CapeCin(pres, temp_k, dew_temp_k, height, st_height):
     
       
     return eqlv_p, parcel_profile,lcl_p, lfc_p, lcl_t, delta_z, CAPE, CIN
+
+if __name__ == '__main__':
+    main()
