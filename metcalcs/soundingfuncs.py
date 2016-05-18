@@ -5,7 +5,7 @@ from scipy.interpolate import interp1d
 import linecache
 import sys
 
-import GeneralMeteoFunctions
+import metfuncs
 #import pdb
 
 def PrintException():
@@ -18,10 +18,6 @@ def PrintException():
     print 'EXCEPTION IN ({}, LINE {} "{}"): {}'.format(filename, lineno, line.strip(), exc_obj)
 
 import re
-
-import imp
-imp.load_source('GenMeteoFuncs', '/nfs/see-fs-01_users/eepdw/python_scripts/modules/GeneralMeteoFunctions.py')
-from GenMeteoFuncs import *
 
 # A few basic checks and possible conversions
 
