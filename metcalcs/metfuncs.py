@@ -519,3 +519,6 @@ def SaturationTemperature(temps_cent, dewp_temps_cent):
     vap_press = VapourPressure(dewp_temps_cent)
 
     return 55.+2840./(3.5*np.log(temp_k)-np.log(vap_press/100.)-4.805) 
+
+if __name__ == '__main__':
+    main()
