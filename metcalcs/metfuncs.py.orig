@@ -1,7 +1,12 @@
-"""
-"""
-
+<<<<<<< HEAD
+"""import numpy as np
+=======
+'''
+'''
 import numpy as np
+
+#import pdb
+>>>>>>> 8fb44951959d9516b8879f619c60ec65281721d4
 
 Rs_da=287.05          # Specific gas const for dry air, J kg^{-1} K^{-1}
 Rs_v=461.51           # Specific gas const for water vapour, J kg^{-1} K^{-1}
@@ -21,6 +26,7 @@ mv=18.0153            # Mean molar mass of water vapor(g/mol)
 def UVWinds(wind_direction, wind_speed):
 
     """
+<<<<<<< HEAD
     U and V winds (westerly, and southerly) from wind directions and wind speeds
 
     Args:
@@ -32,6 +38,9 @@ def UVWinds(wind_direction, wind_speed):
 
     Returns:
         Virtual potential temperatures (K) : array_like
+=======
+
+>>>>>>> 8fb44951959d9516b8879f619c60ec65281721d4
     """
 
     wind_rad = np.radians(wind_direction)
@@ -519,3 +528,6 @@ def SaturationTemperature(temps_cent, dewp_temps_cent):
     vap_press = VapourPressure(dewp_temps_cent)
 
     return 55.+2840./(3.5*np.log(temp_k)-np.log(vap_press/100.)-4.805) 
+
+if __name__ == '__main__':
+    main()

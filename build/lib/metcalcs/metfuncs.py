@@ -1,7 +1,6 @@
-"""
-"""
-
 import numpy as np
+
+#import pdb
 
 Rs_da=287.05          # Specific gas const for dry air, J kg^{-1} K^{-1}
 Rs_v=461.51           # Specific gas const for water vapour, J kg^{-1} K^{-1}
@@ -21,17 +20,6 @@ mv=18.0153            # Mean molar mass of water vapor(g/mol)
 def UVWinds(wind_direction, wind_speed):
 
     """
-    U and V winds (westerly, and southerly) from wind directions and wind speeds
-
-    Args:
-    *    wind_direction: array_like
-    Wind direction (bearing, 0-360)
-    *    wind_speed : array_like
-    Wind speeds (m s**-1)
-    
-
-    Returns:
-        Virtual potential temperatures (K) : array_like
     """
 
     wind_rad = np.radians(wind_direction)
@@ -43,14 +31,16 @@ def UVWinds(wind_direction, wind_speed):
 def VapourPressure(dewp_temps_cent):
 
     """
-    Takes dewpoint temperature in centigrade (use air temperature as dewpoint to get saturated vapour pressure) and returns vapour pressure
-
-    Args:
-    dewp_temps_cent : array_like
-    Dew point temperature (C) 
+    Takes dewpoint temperature in centigrade (use air temperature as dewpoint 
+    for saturated vapour pressure)
+    and returns saturation vapour pressure
+    """   """Water vapor pressure
+    INPUTS
+    dwpt (C) Dew Point Temperature (for SATURATION vapor 
+	     pressure use tempc)
           
-    Returns:
-    e (Pa) Water vapor pressure
+    RETURNS
+    e (Pa) Water Vapor Pressure
 
     SOURCE:
     Bolton, Monthly Weather Review, 1980, p 1047, eq. (10)
@@ -62,39 +52,24 @@ def VapourPressure(dewp_temps_cent):
 def RelativeHumidity(temps_cent, dewp_temps_cent):
 
     """
-    Relative humidity from temperatures and dewpoints
-
-    Args:
-    temps_cent : array_like
-    Temperature (C)
-    dewp_temps_cent : array_like
-    Dewpoint temperature (C)
-
-    Returns: 
-    Relative humidity (%)
-
+    Take temperature and dewpoint in C and returns relative humidity
     """
+
+    #assert 
 
     sat_vap_pres = VapourPressure(temps_cent)
          
     vap_press = VapourPressure(dewp_temps_cent)
+
+   
 
     return 100.*vap_press/sat_vap_pres
 
 def WaterVapourMixingRatio(pressures, dewp_temps_cent):
 
     """
-    Water vapour mixing ratios from pressures and dewpoints 
-
-    Args:
-    *    pressures: array_like
-    Pressures (Pa)
-    *    dewp_temps_cent (C) : array_like
-    Dewpoint temperatures (C)
-
-    Returns:
-        Specific humidity (kg kg**-1) : array_like
-  
+    Takes pressure (Pa) and and dewpoint temperature (C) 
+    and returns WVMR (kg/kg) 
     """
 
     vap_press = VapourPressure(dewp_temps_cent)
@@ -103,17 +78,8 @@ def WaterVapourMixingRatio(pressures, dewp_temps_cent):
 
 def PoissonConstant(wvmr):
     
-        """
-        http://glossary.ametsoc.org/wiki/Poisson_constant
-        May need to tweak low limit for dry air (=0.2854)
-
-        Args:
-        *    wvmr: array_like
-        Water vapour mixing ratio (kg kg**-1)
-
-        Returns:
-        Poisson constant(not sure!) : array_like
-        """
+        """http://glossary.ametsoc.org/wiki/Poisson_constant
+        May need to tweak low limit for dry air (=0.2854)"""
      
         PoC = np.where(wvmr>0., 0.2854*(1-0.24*wvmr), 0.2854)
         PoC = np.where(~np.isnan(wvmr), PoC, np.nan)
@@ -124,17 +90,7 @@ def PoissonConstant(wvmr):
 def SpecificHumidity(pressures, dewp_temps_cent):
 
     """
-    Specificy humidity from pressures and dewpoints
 
-    Args:
-    *    pressures: array_like
-    Pressures (Pa)
-    *    dewp_temps_cent (C) : array_like
-    Dewpoint temperatures (C)
-
-    Returns:
-        Specific humidity (kg kg**-1) : array_like
-    
     """
 
     wvmr = WaterVapourMixingRatio(pressures, dewp_temps_cent)
@@ -144,19 +100,7 @@ def SpecificHumidity(pressures, dewp_temps_cent):
 def Theta(pressures, temps_cent, dewp_temps_cent):
 
     """
-    Potential temperature from pressures, temperatures, and dewpoints
 
-    Args:
-    *    pressures: array_like
-    Pressures (Pa)
-    *    temps_cent (C) : array_like
-    Temperatures (C)
-    *    dewp_temps_cent (C) : array_like
-    Dewpoint temperatures (C)
-
-    Returns:
-        Virtual potential temperatures (K) : array_like
-    
     """
 
     temp_k = temps_cent + 273.15
@@ -172,12 +116,12 @@ def Theta(pressures, temps_cent, dewp_temps_cent):
 # def Theta(temp_k,pres,pref=100000.):
 #     """Potential Temperature
 
-#     Args:: 
+#     INPUTS: 
 #     temp_k (K)
 #     pres (Pa)
 #     pref: 
 
-#     Returns: Theta (K)
+#     OUTPUTS: Theta (K)
 
 #     Source: Wikipedia
 #     Prints a warning if a pressure value below 2000 Pa input, to ensure
@@ -187,16 +131,14 @@ def Theta(pressures, temps_cent, dewp_temps_cent):
 #     return temp_k*(pref/pres)**(Rs_da/Cp_da)
 
 def ThetaSkewT(tempk,pres,pref=100000.):
-    """
-    Potential temperature from temperatures and pressures
+    """Potential Temperature
 
-    Args: 
-    *    tempk (K)
-    *    pres (Pa)
-    *    pref:
+    INPUTS: 
+    tempk (K)
+    pres (Pa)
+    pref:
 
-    Returns: 
-    Theta (K)
+    OUTPUTS: Theta (K)
 
     Source: Wikipedia
     Prints a warning if a pressure value below 2000 Pa input, to ensure
@@ -221,13 +163,10 @@ def TempK(theta,pres,pref=100000.):
 def ThetaV2(tempk,pres,e):
     """Virtual Potential Temperature
     
-    Args:
+    INPUTS
     tempk (K)
     pres (Pa)
     e: Water vapour pressure (Pa) (Optional)
-
-    Returns:
-    Virtual potential temperature
     """ 
 
     wvmr=MixRatio(e,pres)
@@ -240,12 +179,12 @@ def GammaW(temps_cent,dewp_temps_cent, pres):
     """Function to calculate the moist adiabatic lapse rate (deg C/Pa) based
     on the temperature, pressure, and rh of the environment.
 
-    Args:
+    INPUTS:
     tempk (K)
     pres (Pa)
     RH (%)
 
-    Returns:
+    RETURNS:
     GammaW: The moist adiabatic lapse rate (Dec C/Pa)
     """
 
@@ -274,12 +213,12 @@ def GammaW_NoDewP(tempc,pres,e=None):
     """Function to calculate the moist adiabatic lapse rate (deg C/Pa) based
     on the temperature, pressure, and rh of the environment.
 
-    Args:
+    INPUTS:
     tempk (K)
     pres (Pa)
     RH (%)
 
-    Returns:
+    RETURNS:
     GammaW: The moist adiabatic lapse rate (Dec C/Pa)
     """
 
@@ -303,18 +242,8 @@ def GammaW_NoDewP(tempc,pres,e=None):
     return Gamma
 
 def Density(tempk,pres,wvmr):
-    """Caclulate density of moist air with pres/(Rs_da*virtualT)
+    """Density of moist air"""
     
-    Args:
-    tempk : array_like
-        Temperature(s) in kelvin
-    pres : array_like
-       Pressures in Pa
-    wvmr : array_like
-        Water vapour mixing ratio in SI units
-
-    """
- 
     virtualT=VirtualTempFromMixR(tempk,wvmr)
     return pres/(Rs_da*virtualT)
 
@@ -322,12 +251,12 @@ def Density(tempk,pres,wvmr):
 def VirtualTemp(tempk,pres,e):
     """Virtual Temperature
 
-    Args:
+    INPUTS:
     tempk: Temperature (K)
     e: vapour pressure (Pa)
     p: static pressure (Pa)
 
-    Returns:
+    OUTPUTS:
     tempv: Virtual temperature (K)
 
     SOURCE: hmmmm (Wikipedia)."""
@@ -339,11 +268,11 @@ def VirtualTemp(tempk,pres,e):
 def VirtualTempFromMixR(tempk,wvmr):
     """Virtual Temperature
 
-    Args:
+    INPUTS:
     tempk: Temperature (K)
     wvmr: Mixing Ratio (kg/kg)
 
-    Returns:
+    OUTPUTS:
     tempv: Virtual temperature (K)
 
     SOURCE: hmmmm (Wikipedia). This is an approximation
@@ -355,10 +284,10 @@ def VirtualTempFromMixR(tempk,wvmr):
 def Latentc(tempc):
     """Latent heat of condensation (vapourisation)
 
-    Args:
+    INPUTS:
     tempc (C)
 
-    Returns:
+    OUTPUTS:
     L_w (J/kg)
 
     SOURCE:
@@ -370,7 +299,7 @@ def Latentc(tempc):
 def SatVap(tempc,phase="liquid"):
     """Calculate saturation vapour pressure over liquid water and/or ice.
 
-    Args: 
+    INPUTS: 
     tempc: (C)
     phase: ['liquid'],'ice'. If 'liquid', do simple dew point. If 'ice',
     return saturation vapour pressure as follows:
@@ -379,7 +308,7 @@ def SatVap(tempc,phase="liquid"):
     Tc <0: es = es_ice
 
    
-    Returns: e_sat  (Pa)
+    RETURNS: e_sat  (Pa)
     
     SOURCE: http://cires.colorado.edu/~voemel/vp.html (#2:
     CIMO guide (WMO 2008), modified to return values in Pa)
@@ -405,26 +334,24 @@ def SatVap(tempc,phase="liquid"):
 
 def MixRatio(e,p):
     """Mixing ratio of water vapour
-
-    Args:
+    INPUTS
     e (Pa) Water vapor pressure
     p (Pa) Ambient pressure
           
-    Returns:
-    qv (kg kg^-1) Water vapor mixing ratio : array_like
+    RETURNS
+    qv (kg kg^-1) Water vapor mixing ratio
     """
 
     return Epsilon*e/(p-e)
 
 def MixR2VaporPress(qv,p):
     """Return Vapor Pressure given Mixing Ratio and Pressure
-
-    Args:
+    INPUTS
     qv (kg kg^-1) Water vapor mixing ratio`
     p (Pa) Ambient pressure
           
-    Returns:
-    e (Pa) Water vapor pressure : array_like
+    RETURNS
+    e (Pa) Water vapor pressure
     """
 
     return qv*p/(Epsilon+qv)
@@ -433,32 +360,24 @@ def MixR2VaporPress(qv,p):
 
 def DewPoint(e):
     """ Use Bolton's (1980, MWR, p1047) formulae to find tdew.
-
-    Args:
-
-    *    e (Pa) Water Vapor Pressure : array_like
-
-    Returns:
-    Td (C) : array_like
-
+    INPUTS:
+    e (Pa) Water Vapor Pressure
+    OUTPUTS:
+    Td (C) 
       """
 
     ln_ratio=log(e/611.2)
     Td=((17.67-ln_ratio)*degCtoK+243.5*ln_ratio)/(17.67-ln_ratio)
     return Td-degCtoK
 
+# <codecell>
+
+# Several indices
+# http://weather.uwyo.edu/upperair/indices.html
+
 def ThetaE(pressures, temps_cent, dewp_temps_cent):
 
     """
-    Equivalent potential temperature
-    
-    Args:
-    *    pressures (Pa) : array_like
-    *    temp (C) : array_like
-    *    dewpoint temperature (C) : array_like
-
-    Returns:
-        Equivalent potential temperatures (K) : array_like
 
     """
 
@@ -477,22 +396,16 @@ def ThetaE(pressures, temps_cent, dewp_temps_cent):
     return temp_k*((1000./pressures_hpa)**(0.2854*(1.-0.28*wvmr)))*np.exp(((3376./sat_temp)-2.54)*wvmr*(1.+0.81*wvmr))
 
 def ThetaV(pressures, temps_cent, dewp_temps_cent):
-    """
-    Virtual potential temperature
+    """Virtual Potential Temperature
     
-    Args:
-    *    pressures: array_like
-    Pressures (Pa)
-    *    temps_cent (C) : array_like
-    Temperatures (C)
-    *    dewp_temps_cent (C) : array_like
-    Dewpoint temperatures (C)
-
-    Returns:
-        Virtual potential temperatures (K) : array_like
-   
+    INPUTS
+    temp (C)
+    dewpoint temperature (C)
+    pres (Pa)
+  
     """ 
 
+    #pdb.set_trace()
     wvmr = WaterVapourMixingRatio(pressures, dewp_temps_cent)
     theta = Theta(pressures, temps_cent, dewp_temps_cent)
 
@@ -501,20 +414,12 @@ def ThetaV(pressures, temps_cent, dewp_temps_cent):
 def SaturationTemperature(temps_cent, dewp_temps_cent):
 
     """
-    Saturation temperature
-
-    Args:
-    *    temps_cent (C) : array_like
-    Temperatures (C)
-    *    dewp_temps_cent (C) : array_like
-    Dewpoint temperatures (C)
-
-    Returns:
-        Saturation temperatures (K) : array_like
 
     """
 
     temp_k = temps_cent + 273.15
+
+    #pdb.set_trace()
 
     vap_press = VapourPressure(dewp_temps_cent)
 
